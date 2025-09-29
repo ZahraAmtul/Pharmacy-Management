@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+
+{% block title %}New Sale - Pharmacy Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-shopping-cart"></i> New Sale</h5>
+            </div>
+            <div class="card-body">
+                <!-- Medicine Search -->
+                <div class="mb-3">
+                    <label class="form-label">Search Medicine</label>
+                    <input type="text" id="medicine-search" class="form-control" placeholder="Type medicine name...">
+                    <div id="search-results" class="mt-2"></div>
+                </div>
+
+                <!-- Cart -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6>Cart Items</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="cart-items">
+                            <p class="text-muted">No items in cart</p>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Customer (Optional)</label>
+                                <select id="customer-select" class="form-control">
+                                    <option value="">Walk-in Customer</option>
+                                    {% for customer in customers %}
+                                    <option value="{{ customer.id }}">{{ customer.name }} - {{ customer.phone }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Discount (%)</label>
+                                <input type="number" id="discount" class="form-control" value="0" min="0" max="100">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Tax (%)</label>
+                                <input type="number" id="tax" class="form-control" value="0" min="0" max="100">
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Payment Method</label>
+                                <select id="payment-method" class="form-control">
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="digital">Digital Payment</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <h5>Total: $<span id="total-amount">0.00</span></h5>
+                            <button id="complete-sale" class="btn btn-success" disabled>
+                                <i class="fas fa-check"></i> Complete Sale
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6>Available Medicines</h6>
+            </div>
+            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                {% for medicine in medicines %}
+                <div class="medicine-item border-bottom pb-2 mb-2" data-id="{{ medicine.id }}" data-name="{{ medicine.name }}" data-price="{{ medicine.selling_price }}" data-stock="{{ medicine.stock_quantity }}">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>{{ medicine.name }}</strong><br>
+                            <small class="text-muted">{{ medicine.manufacturer }}</small><br>
+                            <span class="badge bg-primary">${{ medicine.selling_price }}</span>
+                            <span class="badge bg-info">Stock: {{ medicine.stock_quantity }}</span>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary add-to-cart">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sale Receipt</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="receipt-content">
+                <!-- Receipt content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="window.print()">Print Receipt</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let cart = [];
+
+// Add to cart functionality
+document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', function() {
+        const item = this.closest('.medicine-item');
+        const medicineData = {
+            id: item.dataset.id,
+            name: item.dataset.name,
+            price: parseFloat(item.dataset.price),
+            stock: parseInt(item.dataset.stock),
+            quantity: 1
+        };
+        
+        addToCart(medicineData);
+    });
+});
+
+function addToCart(medicine) {
+    const existingItem = cart.find(item => item.id === medicine.id);
+    
+    if (existingItem) {
+        if (existingItem.quantity < medicine.stock) {
+            existingItem.quantity++;
+        } else {
+            alert('Not enough stock available!');
+            return;
+        }
+    } else {
+        cart.push({...medicine});
+    }
+    
+    updateCartDisplay();
+}
+
+function updateCartDisplay() {
+    const cartContainer = document.getElementById('cart-items');
+    
+    if (cart.length === 0) {
+        cartContainer.innerHTML = '<p class="text-muted">No items in cart</p>';
+        document.getElementById('complete-sale').disabled = true;
+        return;
+    }
+    
+    let cartHTML = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Medicine</th><th>Price</th><th>Qty</th><th>Total</th><th></th></tr></thead><tbody>';
+    
+    let subtotal = 0;
+    cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        subtotal += itemTotal;
+        
+        cartHTML += `
+            <tr>
+                <td>${item.name}</td>
+                <td>$${item.price.toFixed(2)}</td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" value="${item.quantity}" 
+                           min="1" max="${item.stock}" onchange="updateQuantity(${index}, this.value)">
+                </td>
+                <td>$${itemTotal.toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="removeFromCart(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    cartHTML += '</tbody></table></div>';
+    cartContainer.innerHTML = cartHTML;
+    
+    calculateTotal();
+    document.getElementById('complete-sale').disabled = false;
+}
+
+function updateQuantity(index, newQuantity) {
+    const quantity = parseInt(newQuantity);
+    if (quantity > 0 && quantity <= cart[index].stock) {
+        cart[index].quantity = quantity;
+        updateCartDisplay();
+    }
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartDisplay();
+}
+
+function calculateTotal() {
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const discount = parseFloat(document.getElementById('discount').value) || 0;
+    const tax = parseFloat(document.getElementById('tax').value) || 0;
+    
+    const discountAmount = (subtotal * discount) / 100;
+    const taxAmount = ((subtotal - discountAmount) * tax) / 100;
+    const total = subtotal - discountAmount + taxAmount;
+    
+    document.getElementById('total-amount').textContent = total.toFixed(2);
+}
+
+document.getElementById('discount').addEventListener('input', calculateTotal);
+document.getElementById('tax').addEventListener('input', calculateTotal);
+
+// Complete sale
+document.getElementById('complete-sale').addEventListener('click', function() {
+    if (cart.length === 0) return;
+    
+    const saleData = {
+        items: cart.map(item => ({
+            medicine_id: item.id,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.price * item.quantity
+        })),
+        customer_id: document.getElementById('customer-select').value || null,
+        discount: parseFloat(document.getElementById('discount').value) || 0,
+        tax: parseFloat(document.getElementById('tax').value) || 0,
+        payment_method: document.getElementById('payment-method').value
+    };
+    
+    fetch('{% url "pharmacy:create_sale" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(saleData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Clear cart
+            cart = [];
+            updateCartDisplay();
+            
+            // Show receipt
+            showReceipt(data.sale_id);
+            
+            alert('Sale completed successfully!');
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while processing the sale.');
+    });
+});
+
+function showReceipt(saleId) {
+    fetch(`/receipt/${saleId}/`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('receipt-content').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('receiptModal')).show();
+        });
+}
+</script>
+{% endblock %}

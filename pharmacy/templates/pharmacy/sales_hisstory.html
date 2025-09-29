@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Sales History - Pharmacy Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Sales History</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Sale ID</th>
+                                <th>Date & Time</th>
+                                <th>Customer</th>
+                                <th>Cashier</th>
+                                <th>Items</th>
+                                <th>Total Amount</th>
+                                <th>Discount</th>
+                                <th>Final Amount</th>
+                                <th>Payment</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sale in sales %}
+                            <tr>
+                                <td><strong>#{{ sale.id }}</strong></td>
+                                <td>{{ sale.created_at|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    {% if sale.customer %}
+                                        {{ sale.customer.name }}<br>
+                                        <small class="text-muted">{{ sale.customer.phone }}</small>
+                                    {% else %}
+                                        <span class="text-muted">Walk-in Customer</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ sale.cashier.username }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ sale.items.count }} item(s)</span>
+                                </td>
+                                <td>${{ sale.total_amount }}</td>
+                                <td>
+                                    {% if sale.discount > 0 %}
+                                        {{ sale.discount }}%
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td><strong>${{ sale.final_amount }}</strong></td>
+                                <td>
+                                    <span class="badge bg-primary">{{ sale.get_payment_method_display }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'pharmacy:print_receipt' sale.id %}" 
+                                       class="btn btn-sm btn-outline-primary" target="_blank">
+                                        <i class="fas fa-print"></i> Receipt
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10" class="text-center text-muted">
+                                    <i class="fas fa-history"></i> No sales records found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

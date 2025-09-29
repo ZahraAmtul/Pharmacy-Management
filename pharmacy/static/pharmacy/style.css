@@ -1,0 +1,204 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600;
+}
+
+/* Dashboard Cards */
+.card.bg-primary, .card.bg-warning, .card.bg-success, .card.bg-info {
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+.card.bg-primary .card-body, 
+.card.bg-warning .card-body, 
+.card.bg-success .card-body, 
+.card.bg-info .card-body {
+    padding: 1.5rem;
+}
+
+/* Form Styling */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    font-size: 14px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+/* Medicine Items */
+.medicine-item {
+    cursor: pointer;
+    transition: background-color 0.2s;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.medicine-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Tables */
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    border: none;
+    font-weight: 600;
+}
+
+.table td, .table th {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+/* Receipt Styles */
+.receipt-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.receipt-container h3 {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.receipt-container hr {
+    border-top: 1px dashed #333;
+    margin: 10px 0;
+}
+
+.receipt-details, .receipt-totals {
+    font-size: 12px;
+}
+
+.receipt-items table {
+    width: 100%;
+    font-size: 12px;
+}
+
+.receipt-items th, .receipt-items td {
+    padding: 5px 2px;
+    border: none;
+}
+
+/* Print Styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    .receipt-container, .receipt-container * {
+        visibility: visible;
+    }
+    
+    .receipt-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        max-width: none;
+    }
+    
+    .modal-header, .modal-footer {
+        display: none !important;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar-nav {
+        text-align: center;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+/* Alert Styling */
+.alert {
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+}
+
+/* Badge Styling */
+.badge {
+    font-size: 0.75em;
+    padding: 5px 8px;
+    border-radius: 6px;
+}
+
+/* Search Results */
+#search-results {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+}
+
+.search-result-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}

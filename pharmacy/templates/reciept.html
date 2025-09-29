@@ -1,0 +1,95 @@
+<div class="receipt-container">
+    <div class="text-center mb-4">
+        <h3>MedStore Pro</h3>
+        <p class="mb-1">Your Trusted Pharmacy</p>
+        <p class="mb-1">123 Health Street, Medical City</p>
+        <p class="mb-1">Phone: (555) 123-4567</p>
+        <hr>
+    </div>
+    
+    <div class="receipt-details">
+        <div class="row">
+            <div class="col-6">
+                <strong>Receipt #:</strong> {{ sale.id }}<br>
+                <strong>Date:</strong> {{ sale.created_at|date:"M d, Y H:i" }}<br>
+                <strong>Cashier:</strong> {{ sale.cashier.username }}
+            </div>
+            <div class="col-6 text-end">
+                {% if sale.customer %}
+                <strong>Customer:</strong> {{ sale.customer.name }}<br>
+                <strong>Phone:</strong> {{ sale.customer.phone }}
+                {% else %}
+                <strong>Customer:</strong> Walk-in
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <div class="receipt-items">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-end">Price</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sale.items.all %}
+                <tr>
+                    <td>{{ item.medicine.name }}</td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-end">${{ item.unit_price }}</td>
+                    <td class="text-end">${{ item.total_price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <hr>
+    
+    <div class="receipt-totals">
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-6">
+                <div class="d-flex justify-content-between">
+                    <span>Subtotal:</span>
+                    <span>${{ sale.total_amount }}</span>
+                </div>
+                {% if sale.discount > 0 %}
+                <div class="d-flex justify-content-between">
+                    <span>Discount ({{ sale.discount }}%):</span>
+                    <span>-${% widthratio sale.total_amount 100 sale.discount %}</span>
+                </div>
+                {% endif %}
+                {% if sale.tax > 0 %}
+                <div class="d-flex justify-content-between">
+                    <span>Tax ({{ sale.tax }}%):</span>
+                    <span>+${% widthratio sale.total_amount 100 sale.tax %}</span>
+                </div>
+                {% endif %}
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <strong>Total:</strong>
+                    <strong>${{ sale.final_amount }}</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Payment Method:</span>
+                    <span>{{ sale.get_payment_method_display }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <div class="text-center">
+        <p class="mb-1">Thank you for your business!</p>
+        <p class="mb-1">For any queries, please contact us</p>
+        <p class="small">This is a computer generated receipt</p>
+    </div>
+</div>
